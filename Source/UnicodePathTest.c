@@ -15,6 +15,7 @@ HWND g_hwndParent;
 
 void __UnicodePathTest(wchar_t *sIn)
 {
+	char *pBufferMultiByteAcp = NULL;
 	char *pBufferMultiByteUtf8 = NULL;
 	char *pBufferMultiByteMy = NULL;
 	int nSize;
@@ -47,7 +48,27 @@ void __UnicodePathTest(wchar_t *sIn)
 	if(lstrcmpA(pBufferMultiByteUtf8, pBufferMultiByteMy) == 0)
 		pushstring(L"ascii");	// ok string not contain Unicode characters
 	else
-		pushstring(L"unicode");
+	{
+		// CP_ACP?
+		nSize = WideCharToMultiByte(CP_ACP, 0, sIn, -1, NULL, 0, NULL, NULL);		// get ACP size
+		pBufferMultiByteAcp = (char*)GlobalAlloc(GPTR, nSize);
+
+		// use WideCharToMultiByte to get ACP char*
+		if(WideCharToMultiByte(CP_ACP, 0, sIn, -1, pBufferMultiByteAcp, nSize, NULL, NULL) == 0)
+		{
+			GlobalFree(pBufferMultiByteAcp);
+			pushstring(L"unicode");
+			return;
+		}
+		for(i=0; i<nLen; i++)
+			pBufferMultiByteMy[i] = sIn[i] < 256 ? sIn[i] : 0;
+		// compare if are the same
+		if(lstrcmpA(pBufferMultiByteAcp, pBufferMultiByteMy) == 0)
+			pushstring(L"ascii_cp_acp");	// ok string not contain Unicode characters
+		else
+			pushstring(L"unicode");
+		GlobalFree(pBufferMultiByteAcp);
+	}
 
 	GlobalFree(pBufferMultiByteUtf8);
 	GlobalFree(pBufferMultiByteMy);
