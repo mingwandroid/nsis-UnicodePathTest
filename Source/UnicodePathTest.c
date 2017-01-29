@@ -8,7 +8,7 @@
 #define _UNICODE
 #include <windows.h>
 #include "nsis/pluginapi.h" // nsis plugin
-#pragma comment(lib,"nsis/pluginapi.lib")
+#pragma comment(lib,"__FILE__\\..\\nsis\\pluginapi.lib")
 
 HINSTANCE g_hInstance;
 HWND g_hwndParent;
