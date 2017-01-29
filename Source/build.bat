@@ -1,6 +1,6 @@
 if exist UnicodePathTest.dll del UnicodePathTest.dll
 
-call "%VS80COMNTOOLS%vsvars32"
+call "%VS90COMNTOOLS%vsvars32"
 cl /O1 UnicodePathTest.c /LD kernel32.lib user32.lib /link /ENTRY:DllMain /OPT:NOWIN98
 
 @echo off
