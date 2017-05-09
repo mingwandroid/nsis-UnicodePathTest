@@ -1,14 +1,15 @@
 // nsis-UnicodePathTestTest.cpp : Defines the entry point for the application.
 //
 
-#include "stdafx.h"
+#include <windows.h>
+#include <winuser.h>
+#include <tchar.h>
 #include "nsis-UnicodePathTestTest.h"
 
 #define MAX_LOADSTRING 100
 
-			extern "C" {
-			void __UnicodePathTest(wchar_t *sIn);
-			}
+extern void __UnicodePathTest(wchar_t *sIn);
+extern void __SpecialCharPathTest(wchar_t *sIn);
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
@@ -26,12 +27,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
-
  	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
+
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -54,6 +55,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 			__UnicodePathTest(L"C:\\Users\\ray\\Anaconda3Á");
+			__SpecialCharPathTest(L"C:\\Users\\ray\\Anaconda $!/&\\%^|{}[]<>~`\"':;?@*#");
 		}
 	}
 

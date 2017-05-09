@@ -4,11 +4,9 @@
  *         2011 Marek Mizanin aka Zanir (zanir@szm.sk)           *
  *****************************************************************/
 
-#define UNICODE
-#define _UNICODE
 #include <windows.h>
 #include "nsis/pluginapi.h" // nsis plugin
-#pragma comment(lib,"__FILE__\\..\\nsis\\pluginapi.lib")
+#pragma comment(lib, __FILE__ "\\..\\nsis\\pluginapi.lib")
 
 HINSTANCE g_hInstance;
 HWND g_hwndParent;
@@ -99,6 +97,92 @@ void __declspec(dllexport) UnicodePathTest(HWND hwndParent, int string_size,
 	}
 
 	__UnicodePathTest(sIn);
+}
+
+
+void __SpecialCharPathTest(wchar_t *sIn)
+{
+	wchar_t Specials[] = L" $!/&\\%^|{}[]<>~`\"':;?@*#";
+	#define N_SPECIALS (sizeof(Specials) / sizeof(Specials[0])) - 1
+	static wchar_t BadResult[1024];
+	wchar_t * pBadResult;
+	int FoundSpecials[N_SPECIALS];
+	int nFoundSpecials = 0, nEmittedSpecials = 0;
+	int i, j, nLen;
+	memset(FoundSpecials, 0, sizeof(FoundSpecials));
+	BadResult[0] = L'\0';
+	nLen = lstrlenW(sIn);
+	for (i = 0; i < nLen; ++i)
+	{
+		wchar_t In = sIn[i];
+		for (j = 0; j < N_SPECIALS; ++j)
+		{
+			if (!FoundSpecials[j] && In == Specials[j])
+			{
+				FoundSpecials[j] = 1;
+				nFoundSpecials++;
+			}
+		}
+	}
+
+	if (!nFoundSpecials)
+	{
+		pushstring(L"nothingspecial");
+		return;
+	}
+
+	lstrcat(BadResult, L"You have used the following invalid character");
+	pBadResult = &BadResult[lstrlenW(BadResult)];
+	if (nFoundSpecials > 1)
+	{
+		*pBadResult++ = L's';
+	}
+	*pBadResult++ = L':';
+	*pBadResult++ = L'\n';
+	for (i = 0; i < N_SPECIALS; ++i)
+	{
+		if (FoundSpecials[i])
+		{
+			*pBadResult++ = L'\'';
+			*pBadResult++ = Specials[i];
+			*pBadResult++ = L'\'';
+			if (nFoundSpecials > 1)
+			{
+				if (nEmittedSpecials < nFoundSpecials - 2)
+				{
+					*pBadResult++ = L',';
+					*pBadResult++ = L' ';
+				}
+				else if (nEmittedSpecials < nFoundSpecials - 1)
+				{
+					*pBadResult++ = L' ';
+					*pBadResult++ = L'a';
+					*pBadResult++ = L'n';
+					*pBadResult++ = L'd';
+					*pBadResult++ = L' ';
+				}
+			}
+			++nEmittedSpecials;
+		}
+	}
+	*pBadResult = L'\0';
+	pushstring(BadResult);
+	return;
+}
+
+
+void __declspec(dllexport) SpecialCharPathTest(HWND hwndParent, int string_size, 
+                                               TCHAR *variables, stack_t **stacktop,
+                                               extra_parameters *extra)
+{
+	wchar_t sIn[1024];
+
+	g_hwndParent=hwndParent;
+	EXDLL_INIT();
+
+	popstring(sIn);
+
+	__SpecialCharPathTest(sIn);
 }
 
 BOOL __stdcall DllMain(HANDLE hInst, ULONG ul_reason_for_call, LPVOID lpReserved)
