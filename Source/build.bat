@@ -9,3 +9,5 @@ if exist UnicodePathTest.obj del UnicodePathTest.obj
 if exist UnicodePathTest.exp del UnicodePathTest.exp
 if exist UnicodePathTest.lib del UnicodePathTest.lib
 pause
+
+copy /y UnicodePathTest.dll %~dp0..\Plugin\

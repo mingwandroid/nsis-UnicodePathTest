@@ -102,7 +102,8 @@ void __declspec(dllexport) UnicodePathTest(HWND hwndParent, int string_size,
 
 void __SpecialCharPathTest(wchar_t *sIn)
 {
-	wchar_t Specials[] = L" $!/&\\%^|{}[]<>~`\"':;?@*#";
+	// Some of these (e.g.) '/' get removed by NSIS (MUI2 probably?)
+	wchar_t Specials[] = L":/$!&%^|{}[]<>~`\"';?@*#";
 	#define N_SPECIALS (sizeof(Specials) / sizeof(Specials[0])) - 1
 	static wchar_t BadResult[1024];
 	wchar_t * pBadResult;
@@ -110,7 +111,12 @@ void __SpecialCharPathTest(wchar_t *sIn)
 	int nFoundSpecials = 0, nEmittedSpecials = 0;
 	int i, j, nLen;
 	memset(FoundSpecials, 0, sizeof(FoundSpecials));
+	// OutputDebugStringW(sIn);
 	BadResult[0] = L'\0';
+	// Skip '[a-zA-Z]:', again, NSIS removes any later ':' anyway.
+	if (((sIn[0] >= 'a' && sIn[0] <= 'z') || (sIn[0] >= L'A' && sIn[0] <= L'Z'))
+		 && sIn[1] == L':')
+		sIn += 2;
 	nLen = lstrlenW(sIn);
 	for (i = 0; i < nLen; ++i)
 	{
@@ -131,7 +137,7 @@ void __SpecialCharPathTest(wchar_t *sIn)
 		return;
 	}
 
-	lstrcat(BadResult, L"You have used the following invalid character");
+	lstrcat(BadResult, L"");
 	pBadResult = &BadResult[lstrlenW(BadResult)];
 	if (nFoundSpecials > 1)
 	{
